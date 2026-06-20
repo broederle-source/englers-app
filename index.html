@@ -1,20 +1,32 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Die Englers GmbH - Heizungs- und Energieerfassung</title>
-    <!-- html2pdf for PDF Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
+        /* FARBEN: ENGLER GMBH (Schwarz & Orange) + DARK MODE LOGIK */
         :root {
-            --primary-color: #0b3c5d;
-            --secondary-color: #328cc1;
-            --accent-color: #d9b310;
-            --bg-color: #f4f7f6;
+            --bg-color: #f4f4f5;
             --card-bg: #ffffff;
-            --text-color: #1d2731;
-            --border-color: #cbd5e1;
+            --text-color: #1a1a1a;
+            --primary-color: #000000; /* Engler Schwarz */
+            --accent-color: #ff6600; /* Engler Orange */
+            --border-color: #d1d5db;
+            --input-bg: #f9fafb;
+            --input-focus: rgba(255, 102, 0, 0.15);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e5e5e5;
+            --primary-color: #ff6600; /* Engler Orange dominant im Dark Mode */
+            --accent-color: #ffffff;
+            --border-color: #333333;
+            --input-bg: #2d2d2d;
+            --input-focus: rgba(255, 102, 0, 0.3);
         }
 
         * {
@@ -29,32 +41,40 @@
             color: var(--text-color);
             line-height: 1.6;
             padding-bottom: 40px;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         header {
             background-color: var(--primary-color);
-            color: white;
-            padding: 20px;
-            text-align: center;
+            color: white; /* Bleibt weiß wegen Kontrast */
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: background-color 0.3s;
         }
 
-        header h1 {
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
-        }
+        .header-text h1 { font-size: 1.4rem; margin-bottom: 2px; color: var(--accent-color); }
+        .header-text p { font-size: 0.8rem; opacity: 0.9; }
 
-        header p {
-            font-size: 0.9rem;
-            opacity: 0.9;
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
         }
+        .theme-toggle:hover { background: var(--accent-color); color: #000; }
 
         .container {
-            max-width: 650px;
+            max-width: 750px;
             margin: 20px auto;
             padding: 0 15px;
         }
@@ -64,65 +84,63 @@
             border-radius: 12px;
             padding: 25px;
             margin-bottom: 25px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            border: 1px solid rgba(0,0,0,0.03);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
         .card h2 {
             color: var(--primary-color);
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             margin-bottom: 20px;
-            border-left: 5px solid var(--secondary-color);
+            border-left: 5px solid var(--accent-color);
             padding-left: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            word-wrap: break-word;
         }
 
-        .form-group {
-            margin-bottom: 18px;
-        }
+        .form-group { margin-bottom: 18px; width: 100%; }
 
         label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             font-weight: 600;
             font-size: 0.9rem;
-            color: #334155;
+            color: var(--text-color);
+            word-wrap: break-word;
         }
 
-        input[type="text"],
-        input[type="number"],
-        select,
-        textarea {
+        input[type="text"], input[type="number"], select, textarea {
             width: 100%;
             padding: 12px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 1rem;
-            background-color: #f8fafc;
+            background-color: var(--input-bg);
+            color: var(--text-color);
             transition: all 0.3s ease;
         }
 
         input:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: var(--secondary-color);
-            background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(50, 140, 193, 0.15);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px var(--input-focus);
         }
 
+        /* PERFEKTE RESPONSIVITÄT FÜR ÜBERLAPPUNGEN */
         .row {
             display: flex;
+            flex-wrap: wrap;
             gap: 15px;
         }
 
         .col {
-            flex: 1;
+            flex: 1 1 calc(50% - 15px); /* Nimmt 50% Platz abzüglich Gap */
+            min-width: 200px; /* Bricht sauber in neue Zeile um auf kleinen Handys */
         }
 
         .radio-checkbox-group {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             margin-top: 5px;
             flex-wrap: wrap;
         }
@@ -130,42 +148,37 @@
         .radio-btn {
             display: flex;
             align-items: center;
-            gap: 8px;
-            background: #f1f5f9;
-            padding: 10px 15px;
+            justify-content: center;
+            background: var(--input-bg);
+            padding: 12px 15px;
             border-radius: 8px;
             cursor: pointer;
             user-select: none;
-            flex: 1;
-            min-width: 120px;
-            justify-content: center;
-            border: 1px solid transparent;
+            flex: 1 1 auto;
+            min-width: 100px;
+            border: 1px solid var(--border-color);
             transition: all 0.2s;
+            text-align: center;
+            font-size: 0.9rem;
         }
 
-        input[type="radio"], input[type="checkbox"] {
-            display: none;
-        }
+        input[type="radio"], input[type="checkbox"] { display: none; }
 
-        input[type="radio"]:checked + .radio-btn,
-        input[type="checkbox"]:checked + .radio-btn {
-            background-color: rgba(50, 140, 193, 0.15);
-            border-color: var(--secondary-color);
-            color: var(--primary-color);
+        input[type="radio"]:checked + .radio-btn, input[type="checkbox"]:checked + .radio-btn {
+            background-color: var(--input-focus);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
             font-weight: bold;
         }
 
-        .file-input-wrapper {
-            position: relative;
-            margin-top: 8px;
-        }
+        .file-input-wrapper { position: relative; margin-top: 8px; }
 
         .file-label {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            background: #f1f5f9;
+            background: var(--input-bg);
             border: 2px dashed var(--border-color);
             padding: 15px;
             border-radius: 8px;
@@ -173,31 +186,17 @@
             font-weight: 500;
             text-align: center;
             transition: all 0.3s;
+            color: var(--text-color);
         }
 
-        .file-label:hover {
-            background: #e2e8f0;
-            border-color: var(--secondary-color);
-        }
+        .file-label:hover { border-color: var(--accent-color); }
 
-        .img-preview {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 10px;
-        }
-
-        .img-preview img {
-            width: 70px;
-            height: 70px;
-            object-fit: cover;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-        }
+        .img-preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .img-preview img { width: 70px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); }
 
         .compass-container {
             text-align: center;
-            background: #f8fafc;
+            background: var(--input-bg);
             padding: 15px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
@@ -209,27 +208,22 @@
             height: 120px;
             border-radius: 50%;
             border: 4px solid var(--primary-color);
-            margin: 10px auto;
+            margin: 15px auto;
             position: relative;
-            background: radial-gradient(circle, #fff 40%, #f1f5f9 100%);
-            transition: transform 0.2s ease-out;
+            background: radial-gradient(circle, var(--card-bg) 40%, var(--input-bg) 100%);
+            transition: transform 0.1s ease-out;
         }
 
         .compass-needle {
             width: 4px;
             height: 100px;
-            background: linear-gradient(to bottom, red 50%, #334155 50%);
+            background: linear-gradient(to bottom, red 50%, var(--text-color) 50%);
             position: absolute;
             top: 6px;
             left: 54px;
         }
 
-        .compass-cardinal {
-            position: absolute;
-            font-weight: bold;
-            font-size: 0.8rem;
-            color: var(--primary-color);
-        }
+        .compass-cardinal { position: absolute; font-weight: bold; font-size: 0.8rem; color: var(--text-color); }
         .north { top: 2px; left: 51px; color: red; }
         .east { top: 48px; right: 6px; }
         .south { bottom: 2px; left: 53px; }
@@ -241,205 +235,96 @@
             padding: 15px;
             border: none;
             border-radius: 8px;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
             text-align: center;
             margin-top: 15px;
+            word-wrap: break-word;
         }
 
-        .btn-primary {
-            background-color: var(--secondary-color);
-            color: white;
-        }
+        .btn-primary { background-color: var(--primary-color); color: white; border: 1px solid var(--primary-color); }
+        .btn-primary:hover { background-color: var(--accent-color); color: #000; border-color: var(--accent-color); }
 
-        .btn-primary:hover {
-            background-color: #26719c;
-        }
-
-        .btn-success {
-            background-color: #10b981;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background-color: #059669;
-        }
+        .btn-success { background-color: var(--accent-color); color: #000; }
+        .btn-success:hover { background-color: #e65c00; color: white; }
         
-        .btn-secondary {
-            background-color: #cbd5e1;
-            color: #1d2731;
-        }
-
-        .btn-secondary:hover {
-            background-color: #94a3b8;
-        }
+        .btn-secondary { background-color: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background-color: var(--border-color); }
 
         .btn-info {
-            background-color: #64748b;
-            color: white;
-            padding: 8px 12px;
-            font-size: 0.9rem;
-            width: auto;
-            display: inline-block;
-            margin-top: 0;
+            background-color: var(--primary-color); color: white; padding: 10px 15px; font-size: 0.9rem; width: auto; display: inline-block; margin: 5px;
         }
-        
-        .btn-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-        }
+        .btn-info:hover { background-color: var(--accent-color); color: #000; }
 
-        .hidden {
-            display: none !important;
-        }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 25px; }
+        .btn-group .btn { flex: 1; margin-top: 0; min-width: 140px; }
+
+        .hidden { display: none !important; }
         
         /* Wizard Steps */
-        .step {
-            display: none;
-            animation: fadeIn 0.4s;
-        }
-        .step.active {
-            display: block;
-        }
+        .step { display: none; animation: fadeIn 0.4s; }
+        .step.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .progress-bar {
-            background: #e2e8f0;
-            border-radius: 10px;
-            height: 8px;
-            margin-bottom: 25px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            background: var(--secondary-color);
-            height: 100%;
-            width: 16.66%;
-            transition: width 0.3s ease;
-        }
+        .progress-bar { background: var(--border-color); border-radius: 10px; height: 8px; margin-bottom: 25px; overflow: hidden; }
+        .progress-fill { background: var(--accent-color); height: 100%; width: 16.66%; transition: width 0.3s ease; }
 
         .live-calc-box {
-            background-color: rgba(50, 140, 193, 0.08);
-            border: 1px solid var(--secondary-color);
+            background-color: var(--input-focus);
+            border: 1px solid var(--accent-color);
             padding: 15px;
             border-radius: 8px;
             margin-top: 15px;
         }
+        .live-calc-box h4 { color: var(--primary-color); margin-bottom: 8px; font-size: 0.95rem; }
+        .live-calc-box p { font-size: 0.9rem; margin-bottom: 4px; color: var(--text-color); }
 
-        .live-calc-box h4 {
-            color: var(--primary-color);
-            margin-bottom: 8px;
-            font-size: 0.95rem;
-        }
-
-        .live-calc-box p {
-            font-size: 0.9rem;
-            margin-bottom: 4px;
-        }
-
-        /* PDF Layout */
+        /* Verstecktes Layout für saubere PDF Erstellung */
         #pdf-wrapper {
-            position: absolute;
-            left: -9999px;
-            top: -9999px;
-            width: 800px; 
-            background: white;
-            z-index: -1;
+            position: absolute; left: -9999px; top: -9999px; width: 800px; background: white; z-index: -1;
         }
-
-        #pdf-template {
-            padding: 40px;
-            background: white;
-            color: #000;
-        }
-        .pdf-header {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 3px solid #0b3c5d;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-        .pdf-title {
-            font-size: 24px;
-            color: #0b3c5d;
-            font-weight: bold;
-        }
-        .pdf-company {
-            text-align: right;
-            font-size: 14px;
-            color: #475569;
-        }
-        .pdf-section {
-            margin-bottom: 25px;
-            page-break-inside: avoid;
-        }
-        .pdf-section h3 {
-            font-size: 16px;
-            color: #0b3c5d;
-            border-bottom: 1px solid #cbd5e1;
-            padding-bottom: 4px;
-            margin-bottom: 12px;
-        }
-        .pdf-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px 20px;
-            font-size: 12px;
-        }
-        .pdf-item span {
-            font-weight: bold;
-        }
-        .pdf-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 12px;
-        }
-        .pdf-table th, .pdf-table td {
-            border: 1px solid #cbd5e1;
-            padding: 8px;
-            text-align: left;
-        }
-        .pdf-table th {
-            background-color: #f1f5f9;
-            color: #0b3c5d;
-        }
+        #pdf-template { padding: 40px; background: white; color: #000; }
+        .pdf-header { display: flex; justify-content: space-between; border-bottom: 3px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
+        .pdf-title { font-size: 24px; color: #ff6600; font-weight: bold; }
+        .pdf-company { text-align: right; font-size: 14px; color: #333; }
+        .pdf-section { margin-bottom: 25px; page-break-inside: avoid; }
+        .pdf-section h3 { font-size: 16px; color: #000; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 12px; }
+        .pdf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; font-size: 12px; }
+        .pdf-item span { font-weight: bold; color: #ff6600;}
+        .pdf-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+        .pdf-table th, .pdf-table td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        .pdf-table th { background-color: #f1f1f1; color: #000; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Die Englers GmbH</h1>
-        <p>Digitaler Erfassungsbogen für Heizungsanlagen</p>
+        <div class="header-text">
+            <h1>Die Englers GmbH</h1>
+            <p>Sanitär - Heizung - Klima - Elektro</p>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Hell/Dunkel Modus">🌗</button>
     </header>
 
-    <!-- FORM START inkl. dynamischem Absenden für den E-Mail Betreff -->
-    <form id="mainForm" action="https://formsubmit.co/familiekohlstaedt@icloud.com" method="POST" enctype="multipart/form-data" onsubmit="return prepareSubmit()">
+    <form id="mainForm" action="https://formsubmit.co/familiekohlstaedt@icloud.com" method="POST" enctype="multipart/form-data" onsubmit="return handleFormSubmit(event)">
         
-        <!-- FormSubmit Konfiguration & Branding Felder -->
-        <input type="hidden" name="_subject" id="email_subject" value="Neue Heizungserfassung - Die Englers GmbH">
+        <input type="hidden" name="_subject" id="email_subject" value="Neue Erfassung">
         <input type="hidden" name="_captcha" value="false">
         <input type="hidden" name="_template" value="table">
-        <!-- Diese Felder tauchen als Branding ganz oben in der E-Mail auf -->
-        <input type="hidden" name="00_Firma" value="Die Englers GmbH - Sanitär, Heizung, Klima">
-        <input type="hidden" name="01_System" value="Automatisierte Heizungserfassung">
+        
+        <input type="file" name="Protokoll_PDF" id="hidden_pdf" hidden>
+        <input type="file" name="Daten_CSV" id="hidden_csv" hidden>
         
         <div class="container">
-            
             <div class="progress-bar">
                 <div class="progress-fill" id="progress"></div>
             </div>
 
-            <!-- SCHRITT 1: KUNDENDATEN -->
             <div class="step active" id="step-1">
                 <div class="card">
-                    <h2>Schritt 1: Allgemeines & Kunde</h2>
+                    <h2>1. Allgemeines & Kunde</h2>
                     <div class="form-group">
                         <label for="bearbeiter">Bearbeiter des Angebotes *</label>
                         <select id="bearbeiter" name="Bearbeiter" required>
@@ -467,52 +352,51 @@
                         </div>
                     </div>
                 </div>
-                <!-- Navigation Schritt 1 -->
                 <div class="btn-group">
                     <button type="button" class="btn btn-primary" onclick="nextStep(1)">Weiter zu Schritt 2 ➔</button>
                 </div>
             </div>
 
-            <!-- SCHRITT 2: BESTAND & VERBRAUCH -->
             <div class="step" id="step-2">
                 <div class="card">
-                    <h2>Schritt 2: Bestand & Verbrauch</h2>
+                    <h2>2. Bestand & Verbrauch</h2>
                     <div class="form-group">
-                        <label>Energieträger & Jahresverbrauch (nur zutreffende ausfüllen)</label>
+                        <label>Jahresverbrauch (nur Zutreffendes ausfüllen)</label>
                         <div class="row" style="margin-bottom: 10px;">
-                            <div class="col">
-                                <label style="font-size:0.8rem; font-weight:normal;">Öl (Liter)</label>
+                            <div class="col form-group">
+                                <label style="font-weight:normal;">Öl (Liter)</label>
                                 <input type="number" id="verb_oel" name="Verbrauch_Oel_L" placeholder="z.B. 3000" oninput="calculateHeizungLogik()">
                             </div>
-                            <div class="col">
-                                <label style="font-size:0.8rem; font-weight:normal;">Gas (kWh)</label>
+                            <div class="col form-group">
+                                <label style="font-weight:normal;">Gas (kWh)</label>
                                 <input type="number" id="verb_gas" name="Verbrauch_Gas_kWh" placeholder="z.B. 25000" oninput="calculateHeizungLogik()">
                             </div>
-                            <div class="col">
-                                <label style="font-size:0.8rem; font-weight:normal;">Holz (rm)</label>
+                            <div class="col form-group">
+                                <label style="font-weight:normal;">Holz (rm)</label>
                                 <input type="number" id="verb_holz" name="Verbrauch_Holz_rm" placeholder="z.B. 10" oninput="calculateHeizungLogik()">
                             </div>
                         </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label>Kaltwasser/Warmwasser Zirkulation vorh.?</label>
-                        <div class="radio-checkbox-group">
-                            <label><input type="radio" name="Zirkulation" value="Ja" checked><span class="radio-btn">Ja</span></label>
-                            <label><input type="radio" name="Zirkulation" value="Nein"><span class="radio-btn">Nein</span></label>
+                    <div class="row">
+                        <div class="col form-group">
+                            <label>Zirkulation (Kalt/Warm) vorhanden?</label>
+                            <div class="radio-checkbox-group">
+                                <label><input type="radio" name="Zirkulation" value="Ja" checked><span class="radio-btn">Ja</span></label>
+                                <label><input type="radio" name="Zirkulation" value="Nein"><span class="radio-btn">Nein</span></label>
+                            </div>
+                        </div>
+                        <div class="col form-group">
+                            <label>Thermostatventile voreinstellbar?</label>
+                            <div class="radio-checkbox-group">
+                                <label><input type="radio" name="Thermostatventile_Voreinstellbar" value="Ja"><span class="radio-btn">Ja</span></label>
+                                <label><input type="radio" name="Thermostatventile_Voreinstellbar" value="Nein" checked><span class="radio-btn">Nein</span></label>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Thermostatventile voreinstellbar?</label>
-                        <div class="radio-checkbox-group">
-                            <label><input type="radio" name="Thermostatventile_Voreinstellbar" value="Ja"><span class="radio-btn">Ja</span></label>
-                            <label><input type="radio" name="Thermostatventile_Voreinstellbar" value="Nein" checked><span class="radio-btn">Nein (Abgleich nötig)</span></label>
-                        </div>
-                    </div>
-
-                    <div id="oeltank_details" class="hidden" style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 15px;">
-                        <label style="color: var(--primary-color); font-weight: bold; margin-bottom: 10px;">Details Öltank-Demontage</label>
+                    <div id="oeltank_details" class="hidden" style="background: var(--input-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 15px;">
+                        <label style="color: var(--accent-color); font-weight: bold; margin-bottom: 10px;">Details Öltank-Demontage</label>
                         <div class="form-group">
                             <label>Material des Öltanks</label>
                             <div class="radio-checkbox-group">
@@ -533,35 +417,32 @@
                         </div>
                     </div>
                 </div>
-                <!-- Navigation Schritt 2 -->
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" onclick="prevStep(2)">🡨 Zurück</button>
                     <button type="button" class="btn btn-primary" onclick="nextStep(2)">Weiter zu Schritt 3 ➔</button>
                 </div>
             </div>
 
-            <!-- SCHRITT 3: HEIZKREISE & ANSCHLÜSSE (DYNAMISCH) -->
             <div class="step" id="step-3">
                 <div class="card">
-                    <h2>Schritt 3: Heizkreise & Anschlüsse</h2>
+                    <h2>3. Heizkreise & Anschlüsse</h2>
                     <div class="form-group">
                         <label for="heizkreise">Anzahl der Heizkreise *</label>
                         <input type="number" id="heizkreise" name="Heizkreise_Anzahl" required min="1" value="1" oninput="generateHKFields()">
                     </div>
                     
                     <div id="hk_container">
-                        <!-- Dynamisch generierte Heizkreise erscheinen hier -->
-                    </div>
+                        </div>
 
                     <div class="live-calc-box">
                         <h4>Smart-Formel Analyse (Vorschau):</h4>
                         <p id="calc_heizlast">Geschätzte Heizlast: <strong>-- kW</strong></p>
                         <p id="calc_speicher">Empf. Pufferspeicher: <strong>-- Liter</strong></p>
-                        <p id="calc_demontage" class="hidden">Demontageaufwand Öltank: <strong>--</strong></p>
+                        <p id="calc_demontage" class="hidden">Demontage Öltank: <strong>--</strong></p>
                     </div>
 
                     <div class="file-input-wrapper">
-                        <label>Foto: Alt-Heizung / Typenschild / Öltanks</label>
+                        <label>Foto: Alt-Heizung / Typenschild</label>
                         <label class="file-label">
                             📸 Kamera / Foto öffnen
                             <input type="file" name="Bild_Bestand_Heizung" accept="image/*" capture="environment" onchange="compressAndRenameImage(this, 'prev_bestand', '01_Bestandsanlage')">
@@ -569,37 +450,35 @@
                         <div id="prev_bestand" class="img-preview"></div>
                     </div>
                 </div>
-                <!-- Navigation Schritt 3 -->
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" onclick="prevStep(3)">🡨 Zurück</button>
                     <button type="button" class="btn btn-primary" onclick="nextStep(3)">Weiter zu Schritt 4 ➔</button>
                 </div>
             </div>
 
-            <!-- SCHRITT 4: NEUPLANUNG -->
             <div class="step" id="step-4">
                 <div class="card">
-                    <h2>Schritt 4: Neuplanung & Aufstellort</h2>
+                    <h2>4. Neuplanung & Aufstellort</h2>
                     <div class="form-group">
-                        <label>Gewünschtes Warmwassersystem / Puffer</label>
+                        <label>Gewünschtes Warmwassersystem</label>
                         <div class="radio-checkbox-group">
                             <label><input type="radio" name="Warmwasserpuffer_Art" value="Kompakt" checked><span class="radio-btn">Kompakt</span></label>
                             <label><input type="radio" name="Warmwasserpuffer_Art" value="Getrennt"><span class="radio-btn">Getrennt</span></label>
-                            <label><input type="radio" name="Warmwasserpuffer_Art" value="Energiespeicher mit Frischwasserstation"><span class="radio-btn">Energiespeicher mit FriWa</span></label>
+                            <label><input type="radio" name="Warmwasserpuffer_Art" value="Energiespeicher mit Frischwasserstation"><span class="radio-btn">Energiespeicher (FriWa)</span></label>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label>Aufstellort & Art</label>
                         <select id="aufstellort" name="Aufstellort_Art">
-                            <option value="Boden an Haus">Boden am Haus (Standard Wärmepumpe)</option>
+                            <option value="Boden an Haus">Boden am Haus (Wärmepumpe)</option>
                             <option value="Boden fern von Haus">Boden fern vom Haus</option>
                             <option value="Wand an Haus">Wandmontage am Haus</option>
                         </select>
                     </div>
 
                     <div class="file-input-wrapper">
-                        <label>Foto: Vorgesehener Aufstellort / Platzbedarf</label>
+                        <label>Foto: Vorgesehener Aufstellort</label>
                         <label class="file-label">
                             📸 Kamera / Foto öffnen
                             <input type="file" name="Bild_Aufstellort_Neu" accept="image/*" capture="environment" onchange="compressAndRenameImage(this, 'prev_aufstellort', '02_Neuer_Aufstellort')">
@@ -607,17 +486,15 @@
                         <div id="prev_aufstellort" class="img-preview"></div>
                     </div>
                 </div>
-                <!-- Navigation Schritt 4 -->
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" onclick="prevStep(4)">🡨 Zurück</button>
                     <button type="button" class="btn btn-primary" onclick="nextStep(4)">Weiter zu Schritt 5 ➔</button>
                 </div>
             </div>
 
-            <!-- SCHRITT 5: ELEKTRO, PV, WALLBOX -->
             <div class="step" id="step-5">
                 <div class="card">
-                    <h2>Schritt 5: Elektro & PV-Anlage</h2>
+                    <h2>5. Elektro & PV-Anlage</h2>
                     <div class="row">
                         <div class="col form-group">
                             <label>Zählerschrank Umbau nötig?</label>
@@ -627,7 +504,7 @@
                             </div>
                         </div>
                         <div class="col form-group">
-                            <label for="zuleitung">Zuleitung Haus / Strombedarf</label>
+                            <label for="zuleitung">Zuleitung Haus / Strom</label>
                             <input type="text" id="zuleitung" name="Zuleitung_Strombedarf" placeholder="z.B. 63A / 16mm²">
                         </div>
                     </div>
@@ -657,8 +534,8 @@
                         </div>
                     </div>
 
-                    <div id="pv_section" class="hidden" style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 15px;">
-                        <label style="color: var(--primary-color); font-weight: bold; margin-bottom: 10px;">PV-Dimensionierung & Sensorik</label>
+                    <div id="pv_section" class="hidden" style="background: var(--input-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 15px;">
+                        <label style="color: var(--accent-color); font-weight: bold; margin-bottom: 10px;">PV-Dimensionierung</label>
                         
                         <div class="row">
                             <div class="col form-group">
@@ -666,7 +543,7 @@
                                 <input type="number" id="dachflaeche" name="PV_Dachflaeche_m2" placeholder="z.B. 80" oninput="calculatePVLogik()">
                             </div>
                             <div class="col form-group">
-                                <label for="himmelsrichtung">Himmelsrichtung</label>
+                                <label for="himmelsrichtung">Himmelsrichtung (Manuell wählbar)</label>
                                 <select id="himmelsrichtung" name="PV_Himmelsrichtung" onchange="calculatePVLogik()">
                                     <option value="Süden">Süden (Optimal)</option>
                                     <option value="Süd-West">Süd-West</option>
@@ -679,7 +556,10 @@
                         </div>
 
                         <div class="compass-container">
-                            <button type="button" class="btn btn-info" onclick="startCompass()">🧭 Live-Kompass aktivieren</button>
+                            <p style="font-size:0.85rem; margin-bottom:10px;">Kompass nutzen, in Richtung stellen und sperren:</p>
+                            <button type="button" class="btn-info" onclick="startCompass()">🧭 Live-Kompass Starten</button>
+                            <button type="button" class="btn-info" style="background:#10b981;" onclick="lockCompass()">🔒 Richtung sperren & speichern</button>
+                            
                             <div id="compass_disc" class="compass-disc">
                                 <div class="compass-needle"></div>
                                 <div class="compass-cardinal north">N</div>
@@ -687,7 +567,7 @@
                                 <div class="compass-cardinal south">S</div>
                                 <div class="compass-cardinal west">W</div>
                             </div>
-                            <p id="compass_text" style="font-size:0.85rem; color:#64748b; margin-top:5px;">Richte das Tablet entlang des Dachfirsts aus.</p>
+                            <p id="compass_text" style="font-size:0.9rem; font-weight:bold; color:var(--accent-color); margin-top:5px;">Richtung: Manuell</p>
                         </div>
 
                         <div class="row" style="margin-top:15px;">
@@ -699,12 +579,12 @@
                                 </div>
                             </div>
                             <div class="col form-group">
-                                <label for="speicher_groesse">Gewünschte Speichergröße (kWh)</label>
+                                <label for="speicher_groesse">Speichergröße (kWh)</label>
                                 <input type="number" id="speicher_groesse" name="PV_Speicher_Groesse_kWh" placeholder="Automatik">
                             </div>
                         </div>
 
-                        <div class="live-calc-box" style="background-color: rgba(16, 185, 129, 0.08); border-color: #10b981;">
+                        <div class="live-calc-box">
                             <h4>PV-Potenzial Analyse:</h4>
                             <p id="calc_pv_kwp">Maximaler Ertrag: <strong>-- kWp</strong></p>
                             <p id="calc_pv_speicher_empf">Empfohlener Speicher: <strong>-- kWh</strong></p>
@@ -720,31 +600,26 @@
                         <div id="prev_elektro" class="img-preview"></div>
                     </div>
                 </div>
-                <!-- Navigation Schritt 5 -->
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" onclick="prevStep(5)">🡨 Zurück</button>
                     <button type="button" class="btn btn-primary" onclick="nextStep(5)">Weiter zu Schritt 6 ➔</button>
                 </div>
             </div>
 
-            <!-- SCHRITT 6: ABSCHLUSS -->
             <div class="step" id="step-6">
                 <div class="card">
-                    <h2>Schritt 6: Förderung & Abschluss</h2>
-                    <div class="form-group">
-                        <label>Förderungsrelevante Kriterien</label>
-                        <div class="row" style="margin-bottom:10px;">
-                            <div class="col">
-                                <label style="font-size:0.8rem; font-weight:normal;">Alter Alt-Heizung (Jahre)</label>
-                                <input type="number" id="alter_heizung" name="Alter_Bestandsheizung" placeholder="z.B. 22">
-                            </div>
-                            <div class="col">
-                                <label style="font-size:0.8rem; font-weight:normal;">Nutzungsart</label>
-                                <select name="Objekt_Nutzungsart">
-                                    <option value="Selbst bewohnt">Selbst bewohnt (Max. Förderung)</option>
-                                    <option value="Vermietet">Vermietet</option>
-                                </select>
-                            </div>
+                    <h2>6. Förderung & Abschluss</h2>
+                    <div class="row" style="margin-bottom:15px;">
+                        <div class="col form-group">
+                            <label>Alter Alt-Heizung (Jahre)</label>
+                            <input type="number" id="alter_heizung" name="Alter_Bestandsheizung" placeholder="z.B. 22">
+                        </div>
+                        <div class="col form-group">
+                            <label>Nutzungsart Objekt</label>
+                            <select name="Objekt_Nutzungsart">
+                                <option value="Selbst bewohnt">Selbst bewohnt (Max. Förderung)</option>
+                                <option value="Vermietet">Vermietet</option>
+                            </select>
                         </div>
                     </div>
 
@@ -766,18 +641,16 @@
                     </div>
                 </div>
 
-                <!-- Navigation Schritt 6 -->
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" onclick="prevStep(6)">🡨 Zurück</button>
-                    <button type="button" class="btn btn-primary" onclick="generatePDFAndPreview()">📄 PDF generieren</button>
+                    <button type="button" class="btn btn-primary" onclick="downloadPDF()">📄 PDF Herunterladen</button>
                 </div>
-                <button type="submit" class="btn btn-success" style="margin-top: 20px;">✓ Daten & Fotos absenden</button>
+                <button type="submit" id="submitBtn" class="btn btn-success" style="margin-top: 20px;">✓ Daten, PDF & Fotos in die Firma senden</button>
             </div>
 
         </div>
     </form>
 
-    <!-- HIDDEN PDF GENERATION TEMPLATE -->
     <div id="pdf-wrapper">
         <div id="pdf-template">
             <div class="pdf-header">
@@ -790,92 +663,47 @@
                     Sanitär - Heizung - Klima - Elektro
                 </div>
             </div>
-
             <div class="pdf-section">
                 <h3>Allgemeine Projektdaten</h3>
                 <div class="pdf-grid">
                     <div class="pdf-item"><span>Kunde/Objekt:</span> <div id="pdf_out_kunde"></div></div>
                     <div class="pdf-item"><span>Anschrift:</span> <div id="pdf_out_anschrift"></div></div>
                     <div class="pdf-item"><span>Wohnfläche / WE:</span> <div id="pdf_out_flaeche"></div></div>
-                    <div class="pdf-item"><span>Zuständiger Bearbeiter:</span> <div id="pdf_out_bearbeiter" style="color:#0b3c5d; font-weight:bold;"></div></div>
+                    <div class="pdf-item"><span>Zuständiger Bearbeiter:</span> <div id="pdf_out_bearbeiter" style="color:#000; font-weight:bold;"></div></div>
                 </div>
             </div>
-
             <div class="pdf-section">
                 <h3>Bestand & Energetische Analyse</h3>
                 <table class="pdf-table">
-                    <thead>
-                        <tr>
-                            <th>Parameter</th>
-                            <th>Erfasster Bestandswert</th>
-                            <th>Berechnete Zielwerte (Smart-Formel)</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Parameter</th><th>Bestandswert</th><th>Berechnete Zielwerte</th></tr></thead>
                     <tbody>
-                        <tr>
-                            <td><strong>Energieverbrauch</strong></td>
-                            <td id="pdf_out_verbrauch">--</td>
-                            <td id="pdf_out_heizlast" style="font-weight:bold;">Heizlast: -- kW</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Öltank-Demontage</strong></td>
-                            <td id="pdf_out_oeltank">Nein</td>
-                            <td id="pdf_out_demontage_kosten">--</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Zirkulation & Warmwasser</strong></td>
-                            <td id="pdf_out_zirkulation">--</td>
-                            <td id="pdf_out_speicher_empf">Pufferspeicher: -- L</td>
-                        </tr>
+                        <tr><td><strong>Energieverbrauch</strong></td><td id="pdf_out_verbrauch">--</td><td id="pdf_out_heizlast" style="font-weight:bold;">Heizlast: -- kW</td></tr>
+                        <tr><td><strong>Öltank-Demontage</strong></td><td id="pdf_out_oeltank">Nein</td><td id="pdf_out_demontage_kosten">--</td></tr>
+                        <tr><td><strong>Zirkulation & Warmwasser</strong></td><td id="pdf_out_zirkulation">--</td><td id="pdf_out_speicher_empf">Pufferspeicher: -- L</td></tr>
                     </tbody>
                 </table>
             </div>
-
             <div class="pdf-section">
                 <h3>Heizkreise & Systemtemperaturen</h3>
                 <p style="font-size: 12px; margin-bottom:5px;">Hydraulischer Abgleich erforderlich? <strong id="pdf_out_abgleich">--</strong></p>
                 <table class="pdf-table" id="pdf_hk_table">
-                    <thead>
-                        <tr>
-                            <th>Heizkreis</th>
-                            <th>Vorlauftemperatur (°C)</th>
-                            <th>Rohrdurchmesser / Anschluss</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pdf_out_hk_body">
-                        <!-- Dynamically filled -->
-                    </tbody>
+                    <thead><tr><th>Heizkreis</th><th>Vorlauftemperatur (°C)</th><th>Rohrdurchmesser / Anschluss</th></tr></thead>
+                    <tbody id="pdf_out_hk_body"></tbody>
                 </table>
             </div>
-
             <div class="pdf-section">
                 <h3>Elektro, PV & Peripherie</h3>
                 <table class="pdf-table">
-                    <thead>
-                        <tr>
-                            <th>Gewerk / Komponente</th>
-                            <th>Auswahl / Details</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Gewerk / Komponente</th><th>Auswahl / Details</th></tr></thead>
                     <tbody>
-                        <tr>
-                            <td><strong>Zählerschrank & Infrastruktur</strong></td>
-                            <td id="pdf_out_zaehler">--</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Wallbox & Smart Home</strong></td>
-                            <td id="pdf_out_wallbox_sh">--</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Photovoltaik-System</strong></td>
-                            <td id="pdf_out_pv_details">--</td>
-                        </tr>
+                        <tr><td><strong>Zählerschrank & Infrastruktur</strong></td><td id="pdf_out_zaehler">--</td></tr>
+                        <tr><td><strong>Wallbox & Smart Home</strong></td><td id="pdf_out_wallbox_sh">--</td></tr>
+                        <tr><td><strong>Photovoltaik-System</strong></td><td id="pdf_out_pv_details">--</td></tr>
                     </tbody>
                 </table>
             </div>
-
-            <div class="pdf-section" style="margin-top:20px; padding-top:15px; border-top:1px solid #cbd5e1;">
-                <div style="margin-top:30px; display:flex; justify-content:space-between; font-size:12px;">
+            <div class="pdf-section" style="margin-top:20px; padding-top:15px; border-top:1px solid #ccc;">
+                <div style="margin-top:30px; display:flex; justify-content:space-between; font-size:12px; color:#000;">
                     <div>______________________________________<br>Unterschrift Bearbeiter</div>
                     <div>______________________________________<br>Unterschrift Kunde</div>
                 </div>
@@ -883,12 +711,21 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT APP LOGIC -->
     <script>
-        const totalSteps = 6;
+        // --- Theme Toggle Logic ---
+        function toggleTheme() {
+            const html = document.documentElement;
+            if(html.getAttribute('data-theme') === 'light') {
+                html.setAttribute('data-theme', 'dark');
+            } else {
+                html.setAttribute('data-theme', 'light');
+            }
+        }
 
+        // --- Wizard Logic ---
+        const totalSteps = 6;
         function updateProgress(step) {
-            const percentage = ((step) / totalSteps) * 100;
+            const percentage = (step / totalSteps) * 100;
             document.getElementById('progress').style.width = percentage + '%';
         }
 
@@ -917,14 +754,14 @@
             window.scrollTo(0, 0);
         }
 
+        // --- Heizkreise Dynamisch ---
         function generateHKFields() {
             const count = parseInt(document.getElementById('heizkreise').value) || 1;
             const container = document.getElementById('hk_container');
             container.innerHTML = '';
-            
             for(let i=1; i<=count; i++) {
                 container.innerHTML += `
-                <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--secondary-color);">
+                <div style="background: var(--input-bg); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--accent-color);">
                     <label style="color: var(--primary-color); font-size: 1.05rem;"><strong>Heizkreis ${i}</strong></label>
                     <div class="row" style="margin-top: 10px;">
                         <div class="col form-group">
@@ -945,56 +782,38 @@
             updateProgress(1);
         };
 
-        // Überarbeitete Bild-Logik mit Sicherheitsnetz
+        // --- Bild Komprimierung ---
         function compressAndRenameImage(input, previewId, baseFilename) {
             const container = document.getElementById(previewId);
             container.innerHTML = "";
-            
             if (input.files && input.files[0]) {
                 const file = input.files[0];
                 const reader = new FileReader();
-                
                 reader.onload = function(e) {
                     const img = new Image();
                     img.onload = function() {
                         try {
                             const canvas = document.createElement('canvas');
                             const ctx = canvas.getContext('2d');
-                            
-                            const MAX_WIDTH = 1600;
-                            const MAX_HEIGHT = 1600;
-                            let width = img.width;
-                            let height = img.height;
-
-                            if (width > height) {
-                                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                            } else {
-                                if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                            }
-                            canvas.width = width;
-                            canvas.height = height;
-                            
+                            const MAX = 1600;
+                            let width = img.width, height = img.height;
+                            if (width > height) { if (width > MAX) { height *= MAX / width; width = MAX; } } 
+                            else { if (height > MAX) { width *= MAX / height; height = MAX; } }
+                            canvas.width = width; canvas.height = height;
                             ctx.drawImage(img, 0, 0, width, height);
 
                             canvas.toBlob(function(blob) {
-                                // Versuche die komprimierte Datei ins Formular zu legen (kann von manchen Browsern blockiert werden)
                                 try {
                                     const newFile = new File([blob], baseFilename + ".jpg", { type: "image/jpeg" });
                                     const dataTransfer = new DataTransfer();
                                     dataTransfer.items.add(newFile);
                                     input.files = dataTransfer.files;
-                                } catch (err) {
-                                    console.warn("Gerät erlaubt keine Manipulation der Datei, Originalbild wird versendet.");
-                                    // Wenn es fehlschlägt, behält das Formular einfach das Originalfoto!
-                                }
-
+                                } catch (err) { console.warn("Datei-Austausch blockiert. Original bleibt."); }
                                 const previewImg = document.createElement('img');
                                 previewImg.src = URL.createObjectURL(blob);
                                 container.appendChild(previewImg);
-                                
                             }, 'image/jpeg', 0.8);
                         } catch (err) {
-                            // Rückfall-Vorschau, falls Canvas blockiert ist
                             const previewImg = document.createElement('img');
                             previewImg.src = e.target.result;
                             container.appendChild(previewImg);
@@ -1006,13 +825,7 @@
             }
         }
 
-        // Dynamischer Betreff beim Absenden der E-Mail
-        function prepareSubmit() {
-            const kunde = document.getElementById('kunde_name').value || 'Unbekannt';
-            document.getElementById('email_subject').value = "Neue Heizungserfassung - Die Englers GmbH - Kunde: " + kunde;
-            return true;
-        }
-
+        // --- Hintergrund Berechnungen ---
         function calculateHeizungLogik() {
             const oel = parseFloat(document.getElementById('verb_oel').value) || 0;
             const gas = parseFloat(document.getElementById('verb_gas').value) || 0;
@@ -1022,88 +835,84 @@
 
             const oelBox = document.getElementById('oeltank_details');
             if (oel > 0) {
-                oelBox.classList.remove('hidden');
-                document.getElementById('calc_demontage').classList.remove('hidden');
+                oelBox.classList.remove('hidden'); document.getElementById('calc_demontage').classList.remove('hidden');
             } else {
-                oelBox.classList.add('hidden');
-                document.getElementById('calc_demontage').classList.add('hidden');
+                oelBox.classList.add('hidden'); document.getElementById('calc_demontage').classList.add('hidden');
             }
 
             let heizlast = 0;
             if (oel > 0) heizlast += oel / 250;
             if (gas > 0) heizlast += gas / 2500;
             if (holz > 0) heizlast += (holz * 1500) / 2500;
-
-            if (heizlast === 0 && wohnflaeche > 0) {
-                heizlast = (wohnflaeche * 70) / 1000;
-            }
+            if (heizlast === 0 && wohnflaeche > 0) heizlast = (wohnflaeche * 70) / 1000;
 
             document.getElementById('calc_heizlast').innerHTML = `Geschätzte Heizlast: <strong>${heizlast.toFixed(1)} kW</strong>`;
 
             let speicherLiter = 300; 
-            if (parteien > 1) {
-                speicherLiter = 300 + (parteien - 1) * 150;
-            } else if (heizlast > 15) {
-                speicherLiter = 500;
-            }
+            if (parteien > 1) speicherLiter = 300 + (parteien - 1) * 150;
+            else if (heizlast > 15) speicherLiter = 500;
             document.getElementById('calc_speicher').innerHTML = `Empf. Pufferspeicher: <strong>${speicherLiter} Liter</strong>`;
 
             if (oel > 0) {
                 const material = document.querySelector('input[name="Oeltank_Material"]:checked')?.value || "Kunststoff";
                 const liter = document.getElementById('oeltank_liter').value || 3000;
                 const anzahl = document.getElementById('oeltank_anzahl').value || 3;
-                let aufwand = "Normaler Aufwand";
-                if (material === "Metall" || material === "Beides") {
-                    aufwand = "Erhöhter Aufwand (Schweißbrenner / Zerteilen)";
-                }
-                document.getElementById('calc_demontage').innerHTML = `Demontageaufwand Öltank: <strong>${aufwand} (${liter}L, ${anzahl} Stk.)</strong>`;
+                let aufwand = material === "Kunststoff" ? "Normaler Aufwand" : "Erhöhter Aufwand (Schweißen/Zerteilen)";
+                document.getElementById('calc_demontage').innerHTML = `Demontage Öltank: <strong>${aufwand} (${liter}L, ${anzahl} Stk.)</strong>`;
             }
         }
 
         function togglePVSection(show) {
             const sec = document.getElementById('pv_section');
-            if (show) sec.classList.remove('hidden');
-            else sec.classList.add('hidden');
+            if (show) sec.classList.remove('hidden'); else sec.classList.add('hidden');
         }
-
         function toggleFinanzSection(show) {
             const sec = document.getElementById('finanz_section');
-            if (show) sec.classList.remove('hidden');
-            else sec.classList.add('hidden');
+            if (show) sec.classList.remove('hidden'); else sec.classList.add('hidden');
         }
 
         function calculatePVLogik() {
             const flaeche = parseFloat(document.getElementById('dachflaeche').value) || 0;
             const richtung = document.getElementById('himmelsrichtung').value;
-            let kwp = flaeche * 0.2;
-            let effizienz = 1.0;
+            let kwp = flaeche * 0.2; let effizienz = 1.0;
             if (richtung === "Osten" || richtung === "Westen") effizienz = 0.85;
             if (richtung === "Norden") effizienz = 0.5;
             if (richtung.includes("Süd")) effizienz = 0.95;
             if (richtung === "Süden") effizienz = 1.0;
+            
             const realKwp = kwp * effizienz;
             document.getElementById('calc_pv_kwp').innerHTML = `Maximaler Ertrag: <strong>${realKwp.toFixed(1)} kWp</strong>`;
+            
             let speicher = Math.round(realKwp);
-            if (speicher < 5) speicher = 5;
-            if (speicher > 20) speicher = 20;
-            if (flaeche === 0) speicher = 0;
+            if (speicher < 5) speicher = 5; if (speicher > 20) speicher = 20; if (flaeche === 0) speicher = 0;
             document.getElementById('calc_pv_speicher_empf').innerHTML = `Empfohlener Speicher: <strong>${speicher} kWh</strong>`;
             if (flaeche > 0 && !document.getElementById('speicher_groesse').value) {
                 document.getElementById('speicher_groesse').placeholder = speicher;
             }
         }
 
+        // --- Kompass mit Sperrfunktion ---
+        let compassActive = false;
         function startCompass() {
             const txt = document.getElementById('compass_text');
             if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                DeviceOrientationEvent.requestPermission().then(permissionState => {
-                    if (permissionState === 'granted') window.addEventListener('deviceorientation', handleOrientation, true);
+                DeviceOrientationEvent.requestPermission().then(p => {
+                    if (p === 'granted') { window.addEventListener('deviceorientation', handleOrientation, true); compassActive = true; txt.innerText="Richtung: Messe live...";}
                     else txt.innerText = "Kompass-Berechtigung verweigert.";
                 }).catch(console.error);
             } else {
-                if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-                else if ('ondeviceorientation' in window) window.addEventListener('deviceorientation', handleOrientation, true);
-                else txt.innerText = "Kompass-Sensor nicht verfügbar.";
+                if ('ondeviceorientationabsolute' in window) { window.addEventListener('deviceorientationabsolute', handleOrientation, true); compassActive = true; txt.innerText="Richtung: Messe live...";}
+                else if ('ondeviceorientation' in window) { window.addEventListener('deviceorientation', handleOrientation, true); compassActive = true; txt.innerText="Richtung: Messe live...";}
+                else txt.innerText = "Sensor nicht verfügbar. Bitte manuell im Menü wählen.";
+            }
+        }
+
+        function lockCompass() {
+            window.removeEventListener('deviceorientation', handleOrientation, true);
+            window.removeEventListener('deviceorientationabsolute', handleOrientation, true);
+            if(compassActive) {
+                document.getElementById('compass_text').innerHTML += ' <span style="color:green;">(Gespeichert!)</span>';
+                compassActive = false;
             }
         }
 
@@ -1122,19 +931,13 @@
             else if (degrees >= 202.5 && degrees < 247.5) { dirText = "Süd-West (" + degrees + "°)"; selectVal = "Süd-West"; }
             else if (degrees >= 247.5 && degrees < 292.5) { dirText = "Westen (270°)"; selectVal = "Westen"; }
             else if (degrees >= 292.5 && degrees < 337.5) { dirText = "Nord-West (" + degrees + "°)"; selectVal = "Westen"; }
-            document.getElementById('compass_text').innerHTML = `Erfasste Richtung: <strong>${dirText}</strong>`;
+            document.getElementById('compass_text').innerHTML = `Live: <strong>${dirText}</strong>`;
             document.getElementById('himmelsrichtung').value = selectVal;
             calculatePVLogik();
         }
 
-        function generatePDFAndPreview() {
-            const element = document.getElementById('pdf-template');
-            
-            if(!element) {
-                alert("Fehler: PDF-Template nicht gefunden.");
-                return;
-            }
-
+        // --- Vorbereitung PDF View ---
+        function updatePDFView() {
             document.getElementById('pdf_date').innerText = new Date().toLocaleDateString('de-DE');
             document.getElementById('pdf_out_kunde').innerText = document.getElementById('kunde_name').value || '--';
             document.getElementById('pdf_out_anschrift').innerText = document.getElementById('kunde_anschrift').value || '--';
@@ -1145,64 +948,104 @@
             const gas = document.getElementById('verb_gas').value;
             const holz = document.getElementById('verb_holz').value;
             let verbrText = "";
-            if (oel) verbrText += `Öl: ${oel} L/Jahr `;
-            if (gas) verbrText += `Gas: ${gas} kWh/Jahr `;
-            if (holz) verbrText += `Holz: ${holz} rm/Jahr `;
-            document.getElementById('pdf_out_verbrauch').innerText = verbrText || 'Keine Verbrauchsdaten';
+            if (oel) verbrText += `Öl: ${oel} L `;
+            if (gas) verbrText += `Gas: ${gas} kWh `;
+            if (holz) verbrText += `Holz: ${holz} rm`;
+            document.getElementById('pdf_out_verbrauch').innerText = verbrText || '--';
             document.getElementById('pdf_out_heizlast').innerText = document.getElementById('calc_heizlast').innerText;
 
-            document.getElementById('pdf_out_abgleich').innerText = document.querySelector('input[name="Thermostatventile_Voreinstellbar"]:checked').value === "Ja" ? "Nein" : "JA (Zwingend für Förderung)";
+            document.getElementById('pdf_out_abgleich').innerText = document.querySelector('input[name="Thermostatventile_Voreinstellbar"]:checked').value === "Ja" ? "Nein" : "JA";
             
             const hkTableBody = document.getElementById('pdf_out_hk_body');
             hkTableBody.innerHTML = '';
             const hkVls = document.querySelectorAll('.hk-vl');
             const hkRohrs = document.querySelectorAll('.hk-rohr');
-            
             for(let i = 0; i < hkVls.length; i++) {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>Heizkreis ${i + 1}</td>
-                    <td>${hkVls[i].value} °C</td>
-                    <td>${hkRohrs[i].value || '--'}</td>
-                `;
+                tr.innerHTML = `<td>Heizkreis ${i+1}</td><td>${hkVls[i].value} °C</td><td>${hkRohrs[i].value || '--'}</td>`;
                 hkTableBody.appendChild(tr);
             }
 
             if (oel > 0) {
                 document.getElementById('pdf_out_oeltank').innerText = `${document.querySelector('input[name="Oeltank_Material"]:checked').value}, ${document.getElementById('oeltank_liter').value}L`;
                 document.getElementById('pdf_out_demontage_kosten').innerText = document.getElementById('calc_demontage').innerText;
-            } else {
-                document.getElementById('pdf_out_oeltank').innerText = "Nicht vorhanden";
-                document.getElementById('pdf_out_demontage_kosten').innerText = "--";
             }
 
-            document.getElementById('pdf_out_zirkulation').innerText = `Zirkulation: ${document.querySelector('input[name="Zirkulation"]:checked').value} / Sys: ${document.querySelector('input[name="Warmwasserpuffer_Art"]:checked').value}`;
+            document.getElementById('pdf_out_zirkulation').innerText = `${document.querySelector('input[name="Zirkulation"]:checked').value} / Sys: ${document.querySelector('input[name="Warmwasserpuffer_Art"]:checked').value}`;
             document.getElementById('pdf_out_speicher_empf').innerText = document.getElementById('calc_speicher').innerText;
 
-            document.getElementById('pdf_out_zaehler').innerText = `Zählerschrank-Umbau: ${document.querySelector('input[name="Zaehlerschrank_Umbau"]:checked').value} / Leitung: ${document.getElementById('zuleitung').value || '--'}`;
-            document.getElementById('pdf_out_wallbox_sh').innerText = `Wallbox: ${document.querySelector('input[name="Wallbox"]:checked').value} / Smart Home: ${document.querySelector('input[name="Smart_Home"]:checked').value}`;
+            document.getElementById('pdf_out_zaehler').innerText = `Umbau: ${document.querySelector('input[name="Zaehlerschrank_Umbau"]:checked').value} / Strom: ${document.getElementById('zuleitung').value || '--'}`;
+            document.getElementById('pdf_out_wallbox_sh').innerText = `Wallbox: ${document.querySelector('input[name="Wallbox"]:checked').value} / SmartHome: ${document.querySelector('input[name="Smart_Home"]:checked').value}`;
 
-            const pvJa = document.querySelector('input[name="PV_Anlage"]:checked').value === "Ja";
-            if (pvJa) {
-                document.getElementById('pdf_out_pv_details').innerText = `JA. Fläche: ${document.getElementById('dachflaeche').value} m², Ausrichtung: ${document.getElementById('himmelsrichtung').value}. Ertrag: ${document.getElementById('calc_pv_kwp').innerText}. Speicher: ${document.getElementById('speicher_groesse').value || document.getElementById('speicher_groesse').placeholder} kWh`;
+            if (document.querySelector('input[name="PV_Anlage"]:checked').value === "Ja") {
+                document.getElementById('pdf_out_pv_details').innerText = `JA. ${document.getElementById('dachflaeche').value}m², ${document.getElementById('himmelsrichtung').value}. Speicher: ${document.getElementById('speicher_groesse').value || document.getElementById('speicher_groesse').placeholder} kWh`;
             } else {
-                document.getElementById('pdf_out_pv_details').innerText = "Keine Photovoltaik geplant";
+                document.getElementById('pdf_out_pv_details').innerText = "Nein";
             }
+        }
 
-            const rawDate = new Date();
-            const dateString = ("0" + rawDate.getDate()).slice(-2) + "." + ("0" + (rawDate.getMonth() + 1)).slice(-2) + "." + rawDate.getFullYear();
-            const inputName = document.getElementById('kunde_name').value;
-            const safeKundeName = inputName ? inputName.replace(/[^a-zA-Z0-9äöüÄÖÜß]/g, '_') : 'Kunde';
+        function downloadPDF() {
+            updatePDFView();
+            const element = document.getElementById('pdf-template');
+            const kunde = document.getElementById('kunde_name').value ? document.getElementById('kunde_name').value.replace(/\W/g, '_') : 'Kunde';
+            html2pdf().set({
+                margin: 10, filename: `Erfassung_${kunde}.pdf`, image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(element).save();
+        }
 
+        // --- SUBMIT LOGIK (Baut PDF & CSV unsichtbar und hängt sie an) ---
+        async function handleFormSubmit(event) {
+            event.preventDefault(); // Stoppt den normalen Mail-Versand vorerst
+            
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = "⏳ Generiere PDF & CSV... Bitte warten!";
+            btn.disabled = true;
+
+            // 1. E-Mail Betreff explizit auf den Kundennamen setzen!
+            const kundeNameRaw = document.getElementById('kunde_name').value || 'Unbekannt';
+            const safeKundeName = kundeNameRaw.replace(/\W/g, '_'); // Für saubere Dateinamen
+            document.getElementById('email_subject').value = "Erfassung: " + kundeNameRaw;
+
+            // 2. CSV Datei generieren
+            let csvContent = "Parameter;Wert\n";
+            const formElements = document.querySelectorAll('#mainForm input, #mainForm select, #mainForm textarea');
+            formElements.forEach(i => {
+                if(i.name && !i.name.startsWith('_') && i.type !== 'file' && i.type !== 'hidden') {
+                    if((i.type === 'radio' || i.type === 'checkbox') && !i.checked) return;
+                    let val = i.value.replace(/"/g, '""'); // Verhindert CSV Fehler
+                    csvContent += `"${i.name}";"${val}"\n`;
+                }
+            });
+            // Blob erstellen (mit UTF-8 BOM für Excel)
+            const csvBlob = new Blob(["\uFEFF"+csvContent], { type: 'text/csv;charset=utf-8;' });
+            const csvFile = new File([csvBlob], `Daten_${safeKundeName}.csv`, { type: "text/csv" });
+            const dtCsv = new DataTransfer();
+            dtCsv.items.add(csvFile);
+            document.getElementById('hidden_csv').files = dtCsv.files;
+
+            // 3. PDF Datei generieren
+            updatePDFView();
+            const element = document.getElementById('pdf-template');
             const opt = {
-                margin:       [10, 10, 10, 10],
-                filename:     `Erfassungsprotokoll_${safeKundeName}_${dateString}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                margin: 10, filename: `Protokoll_${safeKundeName}.pdf`, image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            html2pdf().set(opt).from(element).save();
+            try {
+                // PDF als Blob speichern
+                const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
+                const pdfFile = new File([pdfBlob], opt.filename, { type: "application/pdf" });
+                const dtPdf = new DataTransfer();
+                dtPdf.items.add(pdfFile);
+                document.getElementById('hidden_pdf').files = dtPdf.files;
+            } catch(e) {
+                console.error("PDF Anhängen fehlgeschlagen", e);
+            }
+
+            // 4. Formular jetzt endgültig an den Server absenden
+            btn.innerText = "🚀 Sende E-Mail...";
+            document.getElementById('mainForm').submit();
         }
     </script>
 </body>
