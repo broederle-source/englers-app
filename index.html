@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Die Englers GmbH - Heizungs- und Energieerfassung</title>
+    <!-- html2pdf for PDF Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* FARBEN: ENGLER GMBH (Schwarz & Orange) + DARK MODE LOGIK */
@@ -46,14 +47,12 @@
 
         header {
             background-color: var(--primary-color);
-            color: white; /* Bleibt weiß wegen Kontrast */
+            color: white; 
             padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            /* Sticky entfernt für bessere Nutzbarkeit auf kleinen Mobile-Displays */
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             transition: background-color 0.3s;
         }
@@ -134,8 +133,8 @@
         }
 
         .col {
-            flex: 1 1 calc(50% - 15px); /* Nimmt 50% Platz abzüglich Gap */
-            min-width: 200px; /* Bricht sauber in neue Zeile um auf kleinen Handys */
+            flex: 1 1 calc(50% - 15px);
+            min-width: 180px; 
         }
 
         .radio-checkbox-group {
@@ -162,7 +161,7 @@
             font-size: 0.9rem;
         }
 
-        input[type="radio"], input[type="checkbox"] { display: none; }
+        input[type="radio"], input[type="checkbox"], input[type="file"] { display: none; }
 
         input[type="radio"]:checked + .radio-btn, input[type="checkbox"]:checked + .radio-btn {
             background-color: var(--input-focus);
@@ -187,6 +186,7 @@
             text-align: center;
             transition: all 0.3s;
             color: var(--text-color);
+            word-wrap: break-word;
         }
 
         .file-label:hover { border-color: var(--accent-color); }
@@ -235,7 +235,7 @@
             padding: 15px;
             border: none;
             border-radius: 8px;
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
@@ -254,12 +254,12 @@
         .btn-secondary:hover { background-color: var(--border-color); }
 
         .btn-info {
-            background-color: var(--primary-color); color: white; padding: 10px 15px; font-size: 0.9rem; width: auto; display: inline-block; margin: 5px;
+            background-color: var(--primary-color); color: white; padding: 10px 15px; font-size: 0.9rem; width: auto; display: inline-block; margin: 5px; border-radius: 6px; border: none; cursor: pointer;
         }
         .btn-info:hover { background-color: var(--accent-color); color: #000; }
 
-        .btn-group { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 25px; }
-        .btn-group .btn { flex: 1; margin-top: 0; min-width: 140px; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 25px; }
+        .btn-group .btn { flex: 1; margin-top: 0; min-width: 120px; padding: 12px 10px; }
 
         .hidden { display: none !important; }
         
@@ -281,7 +281,7 @@
         .live-calc-box h4 { color: var(--primary-color); margin-bottom: 8px; font-size: 0.95rem; }
         .live-calc-box p { font-size: 0.9rem; margin-bottom: 4px; color: var(--text-color); }
 
-        /* Verstecktes Layout für saubere PDF Erstellung */
+        /* Verstecktes Layout für saubere PDF Erstellung - Seite nicht zerschneiden! */
         #pdf-wrapper {
             position: absolute; left: -9999px; top: -9999px; width: 800px; background: white; z-index: -1;
         }
@@ -289,7 +289,11 @@
         .pdf-header { display: flex; justify-content: space-between; border-bottom: 3px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
         .pdf-title { font-size: 24px; color: #ff6600; font-weight: bold; }
         .pdf-company { text-align: right; font-size: 14px; color: #333; }
+        
+        /* WICHTIG: Verhindert das Zerschneiden von Blöcken und Tabellen im PDF */
         .pdf-section { margin-bottom: 25px; page-break-inside: avoid; }
+        .pdf-table tr { page-break-inside: avoid; }
+        
         .pdf-section h3 { font-size: 16px; color: #000; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 12px; }
         .pdf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; font-size: 12px; }
         .pdf-item span { font-weight: bold; color: #ff6600;}
@@ -314,14 +318,19 @@
         <input type="hidden" name="_captcha" value="false">
         <input type="hidden" name="_template" value="table">
         
-        <input type="file" name="Protokoll_PDF" id="hidden_pdf" hidden>
-        <input type="file" name="Daten_CSV" id="hidden_csv" hidden>
+        <input type="hidden" name="00_Firma" value="Die Englers GmbH - Sanitär, Heizung, Klima">
+        <input type="hidden" name="01_System" value="Automatisierte Heizungserfassung">
+        
+        <!-- Versteckte Inputs für automatisch erzeugte CSV und PDF -->
+        <input type="file" name="Protokoll_PDF" id="hidden_pdf" style="display:none;">
+        <input type="file" name="Daten_CSV" id="hidden_csv" style="display:none;">
         
         <div class="container">
             <div class="progress-bar">
                 <div class="progress-fill" id="progress"></div>
             </div>
 
+            <!-- SCHRITT 1: KUNDENDATEN -->
             <div class="step active" id="step-1">
                 <div class="card">
                     <h2>1. Allgemeines & Kunde</h2>
@@ -357,6 +366,7 @@
                 </div>
             </div>
 
+            <!-- SCHRITT 2: BESTAND & VERBRAUCH -->
             <div class="step" id="step-2">
                 <div class="card">
                     <h2>2. Bestand & Verbrauch</h2>
@@ -423,6 +433,7 @@
                 </div>
             </div>
 
+            <!-- SCHRITT 3: HEIZKREISE -->
             <div class="step" id="step-3">
                 <div class="card">
                     <h2>3. Heizkreise & Anschlüsse</h2>
@@ -432,7 +443,8 @@
                     </div>
                     
                     <div id="hk_container">
-                        </div>
+                        <!-- Dynamisch -->
+                    </div>
 
                     <div class="live-calc-box">
                         <h4>Smart-Formel Analyse (Vorschau):</h4>
@@ -456,6 +468,7 @@
                 </div>
             </div>
 
+            <!-- SCHRITT 4: NEUPLANUNG -->
             <div class="step" id="step-4">
                 <div class="card">
                     <h2>4. Neuplanung & Aufstellort</h2>
@@ -492,6 +505,7 @@
                 </div>
             </div>
 
+            <!-- SCHRITT 5: ELEKTRO, PV -->
             <div class="step" id="step-5">
                 <div class="card">
                     <h2>5. Elektro & PV-Anlage</h2>
@@ -606,6 +620,7 @@
                 </div>
             </div>
 
+            <!-- SCHRITT 6: ABSCHLUSS -->
             <div class="step" id="step-6">
                 <div class="card">
                     <h2>6. Förderung & Abschluss</h2>
@@ -651,6 +666,7 @@
         </div>
     </form>
 
+    <!-- HIDDEN PDF GENERATION TEMPLATE -->
     <div id="pdf-wrapper">
         <div id="pdf-template">
             <div class="pdf-header">
@@ -711,6 +727,7 @@
         </div>
     </div>
 
+    <!-- JAVASCRIPT APP LOGIC -->
     <script>
         // --- Theme Toggle Logic ---
         function toggleTheme() {
@@ -744,7 +761,7 @@
             document.getElementById('step-' + currentStep).classList.remove('active');
             document.getElementById('step-' + (currentStep + 1)).classList.add('active');
             updateProgress(currentStep + 1);
-            window.scrollTo(0, 0);
+            window.scrollTo(0, 0); // Rollt nach oben
         }
 
         function prevStep(currentStep) {
@@ -1004,7 +1021,7 @@
 
             // 1. E-Mail Betreff explizit auf den Kundennamen setzen!
             const kundeNameRaw = document.getElementById('kunde_name').value || 'Unbekannt';
-            const safeKundeName = kundeNameRaw.replace(/\W/g, '_'); // Für saubere Dateinamen
+            const safeKundeName = kundeNameRaw.replace(/\W/g, '_'); 
             document.getElementById('email_subject').value = "Erfassung: " + kundeNameRaw;
 
             // 2. CSV Datei generieren
