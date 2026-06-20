@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Die Englers GmbH - Heizungs- und Energieerfassung</title>
+    <!-- html2pdf for PDF Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -418,10 +419,16 @@
         <p>Digitaler Erfassungsbogen für Heizungsanlagen</p>
     </header>
 
-    <form id="mainForm" action="https://formsubmit.co/familiekohlstaedt@icloud.com" method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="_subject" value="Neue Heizungserfassung - Die Englers GmbH">
+    <!-- FORM START inkl. dynamischem Absenden für den E-Mail Betreff -->
+    <form id="mainForm" action="https://formsubmit.co/familiekohlstaedt@icloud.com" method="POST" enctype="multipart/form-data" onsubmit="return prepareSubmit()">
+        
+        <!-- FormSubmit Konfiguration & Branding Felder -->
+        <input type="hidden" name="_subject" id="email_subject" value="Neue Heizungserfassung - Die Englers GmbH">
         <input type="hidden" name="_captcha" value="false">
         <input type="hidden" name="_template" value="table">
+        <!-- Diese Felder tauchen als Branding ganz oben in der E-Mail auf -->
+        <input type="hidden" name="00_Firma" value="Die Englers GmbH - Sanitär, Heizung, Klima">
+        <input type="hidden" name="01_System" value="Automatisierte Heizungserfassung">
         
         <div class="container">
             
@@ -429,6 +436,7 @@
                 <div class="progress-fill" id="progress"></div>
             </div>
 
+            <!-- SCHRITT 1: KUNDENDATEN -->
             <div class="step active" id="step-1">
                 <div class="card">
                     <h2>Schritt 1: Allgemeines & Kunde</h2>
@@ -459,11 +467,13 @@
                         </div>
                     </div>
                 </div>
+                <!-- Navigation Schritt 1 -->
                 <div class="btn-group">
                     <button type="button" class="btn btn-primary" onclick="nextStep(1)">Weiter zu Schritt 2 ➔</button>
                 </div>
             </div>
 
+            <!-- SCHRITT 2: BESTAND & VERBRAUCH -->
             <div class="step" id="step-2">
                 <div class="card">
                     <h2>Schritt 2: Bestand & Verbrauch</h2>
@@ -523,12 +533,14 @@
                         </div>
                     </div>
                 </div>
+                <!-- Navigation Schritt 2 -->
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" onclick="prevStep(2)">🡨 Zurück</button>
                     <button type="button" class="btn btn-primary" onclick="nextStep(2)">Weiter zu Schritt 3 ➔</button>
                 </div>
             </div>
 
+            <!-- SCHRITT 3: HEIZKREISE & ANSCHLÜSSE (DYNAMISCH) -->
             <div class="step" id="step-3">
                 <div class="card">
                     <h2>Schritt 3: Heizkreise & Anschlüsse</h2>
@@ -538,7 +550,8 @@
                     </div>
                     
                     <div id="hk_container">
-                        </div>
+                        <!-- Dynamisch generierte Heizkreise erscheinen hier -->
+                    </div>
 
                     <div class="live-calc-box">
                         <h4>Smart-Formel Analyse (Vorschau):</h4>
@@ -556,12 +569,14 @@
                         <div id="prev_bestand" class="img-preview"></div>
                     </div>
                 </div>
+                <!-- Navigation Schritt 3 -->
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" onclick="prevStep(3)">🡨 Zurück</button>
                     <button type="button" class="btn btn-primary" onclick="nextStep(3)">Weiter zu Schritt 4 ➔</button>
                 </div>
             </div>
 
+            <!-- SCHRITT 4: NEUPLANUNG -->
             <div class="step" id="step-4">
                 <div class="card">
                     <h2>Schritt 4: Neuplanung & Aufstellort</h2>
@@ -592,12 +607,14 @@
                         <div id="prev_aufstellort" class="img-preview"></div>
                     </div>
                 </div>
+                <!-- Navigation Schritt 4 -->
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" onclick="prevStep(4)">🡨 Zurück</button>
                     <button type="button" class="btn btn-primary" onclick="nextStep(4)">Weiter zu Schritt 5 ➔</button>
                 </div>
             </div>
 
+            <!-- SCHRITT 5: ELEKTRO, PV, WALLBOX -->
             <div class="step" id="step-5">
                 <div class="card">
                     <h2>Schritt 5: Elektro & PV-Anlage</h2>
@@ -703,12 +720,14 @@
                         <div id="prev_elektro" class="img-preview"></div>
                     </div>
                 </div>
+                <!-- Navigation Schritt 5 -->
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" onclick="prevStep(5)">🡨 Zurück</button>
                     <button type="button" class="btn btn-primary" onclick="nextStep(5)">Weiter zu Schritt 6 ➔</button>
                 </div>
             </div>
 
+            <!-- SCHRITT 6: ABSCHLUSS -->
             <div class="step" id="step-6">
                 <div class="card">
                     <h2>Schritt 6: Förderung & Abschluss</h2>
@@ -747,6 +766,7 @@
                     </div>
                 </div>
 
+                <!-- Navigation Schritt 6 -->
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" onclick="prevStep(6)">🡨 Zurück</button>
                     <button type="button" class="btn btn-primary" onclick="generatePDFAndPreview()">📄 PDF generieren</button>
@@ -757,6 +777,7 @@
         </div>
     </form>
 
+    <!-- HIDDEN PDF GENERATION TEMPLATE -->
     <div id="pdf-wrapper">
         <div id="pdf-template">
             <div class="pdf-header">
@@ -822,7 +843,8 @@
                         </tr>
                     </thead>
                     <tbody id="pdf_out_hk_body">
-                        </tbody>
+                        <!-- Dynamically filled -->
+                    </tbody>
                 </table>
             </div>
 
@@ -861,6 +883,7 @@
         </div>
     </div>
 
+    <!-- JAVASCRIPT APP LOGIC -->
     <script>
         const totalSteps = 6;
 
@@ -922,6 +945,7 @@
             updateProgress(1);
         };
 
+        // Überarbeitete Bild-Logik mit Sicherheitsnetz
         function compressAndRenameImage(input, previewId, baseFilename) {
             const container = document.getElementById(previewId);
             container.innerHTML = "";
@@ -933,46 +957,60 @@
                 reader.onload = function(e) {
                     const img = new Image();
                     img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        const MAX_WIDTH = 1600;
-                        const MAX_HEIGHT = 1600;
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > height) {
-                            if (width > MAX_WIDTH) {
-                                height *= MAX_WIDTH / width;
-                                width = MAX_WIDTH;
-                            }
-                        } else {
-                            if (height > MAX_HEIGHT) {
-                                width *= MAX_HEIGHT / height;
-                                height = MAX_HEIGHT;
-                            }
-                        }
-                        canvas.width = width;
-                        canvas.height = height;
-                        
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        canvas.toBlob(function(blob) {
-                            const newFile = new File([blob], baseFilename + ".jpg", { type: "image/jpeg" });
-                            const dataTransfer = new DataTransfer();
-                            dataTransfer.items.add(newFile);
-                            input.files = dataTransfer.files;
-
-                            const previewImg = document.createElement('img');
-                            previewImg.src = URL.createObjectURL(blob);
-                            container.appendChild(previewImg);
+                        try {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
                             
-                        }, 'image/jpeg', 0.8);
+                            const MAX_WIDTH = 1600;
+                            const MAX_HEIGHT = 1600;
+                            let width = img.width;
+                            let height = img.height;
+
+                            if (width > height) {
+                                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                            } else {
+                                if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                            }
+                            canvas.width = width;
+                            canvas.height = height;
+                            
+                            ctx.drawImage(img, 0, 0, width, height);
+
+                            canvas.toBlob(function(blob) {
+                                // Versuche die komprimierte Datei ins Formular zu legen (kann von manchen Browsern blockiert werden)
+                                try {
+                                    const newFile = new File([blob], baseFilename + ".jpg", { type: "image/jpeg" });
+                                    const dataTransfer = new DataTransfer();
+                                    dataTransfer.items.add(newFile);
+                                    input.files = dataTransfer.files;
+                                } catch (err) {
+                                    console.warn("Gerät erlaubt keine Manipulation der Datei, Originalbild wird versendet.");
+                                    // Wenn es fehlschlägt, behält das Formular einfach das Originalfoto!
+                                }
+
+                                const previewImg = document.createElement('img');
+                                previewImg.src = URL.createObjectURL(blob);
+                                container.appendChild(previewImg);
+                                
+                            }, 'image/jpeg', 0.8);
+                        } catch (err) {
+                            // Rückfall-Vorschau, falls Canvas blockiert ist
+                            const previewImg = document.createElement('img');
+                            previewImg.src = e.target.result;
+                            container.appendChild(previewImg);
+                        }
                     };
                     img.src = e.target.result;
                 }
                 reader.readAsDataURL(file);
             }
+        }
+
+        // Dynamischer Betreff beim Absenden der E-Mail
+        function prepareSubmit() {
+            const kunde = document.getElementById('kunde_name').value || 'Unbekannt';
+            document.getElementById('email_subject').value = "Neue Heizungserfassung - Die Englers GmbH - Kunde: " + kunde;
+            return true;
         }
 
         function calculateHeizungLogik() {
@@ -1151,11 +1189,9 @@
                 document.getElementById('pdf_out_pv_details').innerText = "Keine Photovoltaik geplant";
             }
 
-            // NEU: PDF Dateiname mit Datum und Kundenname generieren
             const rawDate = new Date();
             const dateString = ("0" + rawDate.getDate()).slice(-2) + "." + ("0" + (rawDate.getMonth() + 1)).slice(-2) + "." + rawDate.getFullYear();
             const inputName = document.getElementById('kunde_name').value;
-            // Sonderzeichen und Leerzeichen ersetzen für sicheren Dateinamen
             const safeKundeName = inputName ? inputName.replace(/[^a-zA-Z0-9äöüÄÖÜß]/g, '_') : 'Kunde';
 
             const opt = {
