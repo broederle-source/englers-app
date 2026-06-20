@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Die Englers GmbH - Heizungs- und Energieerfassung</title>
-    <!-- html2pdf for PDF Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* FARBEN: ENGLER GMBH (Schwarz & Orange) + DARK MODE LOGIK */
@@ -52,7 +51,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            /* Sticky entfernt für bessere Nutzbarkeit auf kleinen Mobile-Displays */
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             transition: background-color 0.3s;
         }
@@ -125,7 +123,6 @@
             box-shadow: 0 0 0 3px var(--input-focus);
         }
 
-        /* PERFEKTE RESPONSIVITÄT FÜR ÜBERLAPPUNGEN */
         .row {
             display: flex;
             flex-wrap: wrap;
@@ -281,7 +278,7 @@
         .live-calc-box h4 { color: var(--primary-color); margin-bottom: 8px; font-size: 0.95rem; }
         .live-calc-box p { font-size: 0.9rem; margin-bottom: 4px; color: var(--text-color); }
 
-        /* Verstecktes Layout für saubere PDF Erstellung - Seite nicht zerschneiden! */
+        /* PDF Layout */
         #pdf-wrapper {
             position: absolute; left: -9999px; top: -9999px; width: 800px; background: white; z-index: -1;
         }
@@ -290,7 +287,6 @@
         .pdf-title { font-size: 24px; color: #ff6600; font-weight: bold; }
         .pdf-company { text-align: right; font-size: 14px; color: #333; }
         
-        /* WICHTIG: Verhindert das Zerschneiden von Blöcken und Tabellen im PDF */
         .pdf-section { margin-bottom: 25px; page-break-inside: avoid; }
         .pdf-table tr { page-break-inside: avoid; }
         
@@ -312,8 +308,30 @@
         <button class="theme-toggle" onclick="toggleTheme()" title="Hell/Dunkel Modus">🌗</button>
     </header>
 
-    <form id="mainForm" action="https://formsubmit.co/familiekohlstaedt@icloud.com" method="POST" enctype="multipart/form-data" onsubmit="return handleFormSubmit(event)">
+    <datalist id="rohr_options">
+        <option value="28mm Kupfer (Cu)">
+        <option value="22mm Kupfer (Cu)">
+        <option value="35mm Kupfer (Cu)">
+        <option value="26mm Mehrschichtverbundrohr">
+        <option value="32mm Mehrschichtverbundrohr">
+        <option value="28mm C-Stahl">
+        <option value="35mm C-Stahl">
+        <option value="DN25 (1 Zoll Stahlrohr)">
+        <option value="DN32 (1 1/4 Zoll Stahlrohr)">
+    </datalist>
+
+    <datalist id="strom_options">
+        <option value="3x 63A SLS / 16mm²">
+        <option value="3x 50A SLS / 16mm²">
+        <option value="3x 35A SLS / 10mm²">
+        <option value="Wechselstrom (Altbau)">
+        <option value="Unbekannt / Noch zu prüfen">
+    </datalist>
+
+    <form id="mainForm" action="https://formsubmit.co/s.kohlstaedt@engleronline.de" method="POST" enctype="multipart/form-data" onsubmit="return handleFormSubmit(event)">
         
+        <input type="hidden" name="_cc" value="familiekohlstaedt@icloud.com">
+
         <input type="hidden" name="_subject" id="email_subject" value="Neue Erfassung">
         <input type="hidden" name="_captcha" value="false">
         <input type="hidden" name="_template" value="table">
@@ -321,7 +339,6 @@
         <input type="hidden" name="00_Firma" value="Die Englers GmbH - Sanitär, Heizung, Klima">
         <input type="hidden" name="01_System" value="Automatisierte Heizungserfassung">
         
-        <!-- Versteckte Inputs für automatisch erzeugte CSV und PDF -->
         <input type="file" name="Protokoll_PDF" id="hidden_pdf" style="display:none;">
         <input type="file" name="Daten_CSV" id="hidden_csv" style="display:none;">
         
@@ -330,7 +347,6 @@
                 <div class="progress-fill" id="progress"></div>
             </div>
 
-            <!-- SCHRITT 1: KUNDENDATEN -->
             <div class="step active" id="step-1">
                 <div class="card">
                     <h2>1. Allgemeines & Kunde</h2>
@@ -366,7 +382,6 @@
                 </div>
             </div>
 
-            <!-- SCHRITT 2: BESTAND & VERBRAUCH -->
             <div class="step" id="step-2">
                 <div class="card">
                     <h2>2. Bestand & Verbrauch</h2>
@@ -433,7 +448,6 @@
                 </div>
             </div>
 
-            <!-- SCHRITT 3: HEIZKREISE -->
             <div class="step" id="step-3">
                 <div class="card">
                     <h2>3. Heizkreise & Anschlüsse</h2>
@@ -443,8 +457,7 @@
                     </div>
                     
                     <div id="hk_container">
-                        <!-- Dynamisch -->
-                    </div>
+                        </div>
 
                     <div class="live-calc-box">
                         <h4>Smart-Formel Analyse (Vorschau):</h4>
@@ -468,7 +481,6 @@
                 </div>
             </div>
 
-            <!-- SCHRITT 4: NEUPLANUNG -->
             <div class="step" id="step-4">
                 <div class="card">
                     <h2>4. Neuplanung & Aufstellort</h2>
@@ -505,7 +517,6 @@
                 </div>
             </div>
 
-            <!-- SCHRITT 5: ELEKTRO, PV -->
             <div class="step" id="step-5">
                 <div class="card">
                     <h2>5. Elektro & PV-Anlage</h2>
@@ -519,7 +530,7 @@
                         </div>
                         <div class="col form-group">
                             <label for="zuleitung">Zuleitung Haus / Strom</label>
-                            <input type="text" id="zuleitung" name="Zuleitung_Strombedarf" placeholder="z.B. 63A / 16mm²">
+                            <input type="text" id="zuleitung" name="Zuleitung_Strombedarf" list="strom_options" placeholder="Auswählen oder tippen...">
                         </div>
                     </div>
 
@@ -620,7 +631,6 @@
                 </div>
             </div>
 
-            <!-- SCHRITT 6: ABSCHLUSS -->
             <div class="step" id="step-6">
                 <div class="card">
                     <h2>6. Förderung & Abschluss</h2>
@@ -666,7 +676,6 @@
         </div>
     </form>
 
-    <!-- HIDDEN PDF GENERATION TEMPLATE -->
     <div id="pdf-wrapper">
         <div id="pdf-template">
             <div class="pdf-header">
@@ -727,7 +736,6 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT APP LOGIC -->
     <script>
         // --- Theme Toggle Logic ---
         function toggleTheme() {
@@ -761,7 +769,7 @@
             document.getElementById('step-' + currentStep).classList.remove('active');
             document.getElementById('step-' + (currentStep + 1)).classList.add('active');
             updateProgress(currentStep + 1);
-            window.scrollTo(0, 0); // Rollt nach oben
+            window.scrollTo(0, 0);
         }
 
         function prevStep(currentStep) {
@@ -787,7 +795,7 @@
                         </div>
                         <div class="col form-group">
                             <label>Rohrdurchmesser *</label>
-                            <input type="text" name="HK${i}_Rohr" class="hk-rohr" required placeholder="z.B. 28mm Cu">
+                            <input type="text" name="HK${i}_Rohr" class="hk-rohr" list="rohr_options" required placeholder="Auswählen oder tippen...">
                         </div>
                     </div>
                 </div>`;
@@ -1011,37 +1019,33 @@
             }).from(element).save();
         }
 
-        // --- SUBMIT LOGIK (Baut PDF & CSV unsichtbar und hängt sie an) ---
+        // --- SUBMIT LOGIK ---
         async function handleFormSubmit(event) {
-            event.preventDefault(); // Stoppt den normalen Mail-Versand vorerst
+            event.preventDefault(); 
             
             const btn = document.getElementById('submitBtn');
             btn.innerText = "⏳ Generiere PDF & CSV... Bitte warten!";
             btn.disabled = true;
 
-            // 1. E-Mail Betreff explizit auf den Kundennamen setzen!
             const kundeNameRaw = document.getElementById('kunde_name').value || 'Unbekannt';
             const safeKundeName = kundeNameRaw.replace(/\W/g, '_'); 
             document.getElementById('email_subject').value = "Erfassung: " + kundeNameRaw;
 
-            // 2. CSV Datei generieren
             let csvContent = "Parameter;Wert\n";
             const formElements = document.querySelectorAll('#mainForm input, #mainForm select, #mainForm textarea');
             formElements.forEach(i => {
                 if(i.name && !i.name.startsWith('_') && i.type !== 'file' && i.type !== 'hidden') {
                     if((i.type === 'radio' || i.type === 'checkbox') && !i.checked) return;
-                    let val = i.value.replace(/"/g, '""'); // Verhindert CSV Fehler
+                    let val = i.value.replace(/"/g, '""'); 
                     csvContent += `"${i.name}";"${val}"\n`;
                 }
             });
-            // Blob erstellen (mit UTF-8 BOM für Excel)
             const csvBlob = new Blob(["\uFEFF"+csvContent], { type: 'text/csv;charset=utf-8;' });
             const csvFile = new File([csvBlob], `Daten_${safeKundeName}.csv`, { type: "text/csv" });
             const dtCsv = new DataTransfer();
             dtCsv.items.add(csvFile);
             document.getElementById('hidden_csv').files = dtCsv.files;
 
-            // 3. PDF Datei generieren
             updatePDFView();
             const element = document.getElementById('pdf-template');
             const opt = {
@@ -1050,17 +1054,13 @@
             };
 
             try {
-                // PDF als Blob speichern
                 const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
                 const pdfFile = new File([pdfBlob], opt.filename, { type: "application/pdf" });
                 const dtPdf = new DataTransfer();
                 dtPdf.items.add(pdfFile);
                 document.getElementById('hidden_pdf').files = dtPdf.files;
-            } catch(e) {
-                console.error("PDF Anhängen fehlgeschlagen", e);
-            }
+            } catch(e) { console.error("PDF Anhängen fehlgeschlagen", e); }
 
-            // 4. Formular jetzt endgültig an den Server absenden
             btn.innerText = "🚀 Sende E-Mail...";
             document.getElementById('mainForm').submit();
         }
